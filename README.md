@@ -1,6 +1,6 @@
 # finops-mcp-server
 
-A Model Context Protocol (MCP) server that connects Claude Desktop and Claude Code to the [Finance AI Ecosystem](https://github.com/Chezhira/finance-ai-pack) — a multi-agent accounting, tax, FP&A, audit, treasury, and corporate finance system.
+A Model Context Protocol (MCP) server that connects Claude Desktop and Claude Code to the [Finance AI Ecosystem](https://github.com/Chezhira/finance-accounting-ecosystem) — a multi-agent accounting, tax, FP&A, audit, treasury, and corporate finance system.
 
 Ask Claude to ingest financial data, trigger agent analysis, review suggestion cards, and approve or reject agent recommendations — all from natural language in Claude Desktop.
 
@@ -104,7 +104,7 @@ FINOPS_TIMEOUT=30
 ### 4. Start the Finance AI Ecosystem first
 
 ```bash
-# In the finance-ai-pack directory
+# In the finance-accounting-ecosystem directory
 uvicorn api.main:app --reload --port 8000
 ```
 
@@ -217,7 +217,7 @@ Trigger a Postgres sync.
 
 ## Related
 
-- [finance-ai-pack](https://github.com/Chezhira/finance-ai-pack) — the Finance AI Ecosystem backend this server wraps
+- [finance-accounting-ecosystem](https://github.com/Chezhira/finance-accounting-ecosystem) — the Finance AI Ecosystem backend this server wraps
 - [odoo19-mcp-server](https://github.com/Chezhira/odoo19-mcp-server) — MCP server for Odoo 19 GL queries
 
 ---
