@@ -572,6 +572,79 @@ def sync_postgres() -> str:
     return _post("/sync", {})
 
 
+
+# ===========================================================================
+# TIER 4 — Direct Analysis (no backend required)
+# ===========================================================================
+
+@mcp.tool()
+def reconcile_intercompany(
+    entity_a: str,
+    entity_b: str,
+    period: str,
+    data_path: Optional[str] = None,
+) -> str:
+    """
+    Reconcile intercompany balances between two entities directly from a
+    trial balance CSV. No backend server required — runs against local data.
+    Identifies mismatches between EntityA receivable (1100) vs EntityB
+    payable (2001) and returns a structured variance report.
+
+    Args:
+        entity_a:   First entity code e.g. "EntityA"
+        entity_b:   Second entity code e.g. "EntityB"
+        period:     Period in YYYY-MM format e.g. "2025-12"
+        data_path:  Full path to trial balance CSV. Defaults to env var
+                    TRIAL_BALANCE_PATH or the finops default data path.
+
+    Returns:
+        Structured intercompany reconciliation report with gap analysis
+        and recommended correcting entry.
+    """
+    try:
+        import pandas as pd
+
+        path = data_path or os.getenv("TRIAL_BALANCE_PATH", "data/trial_balance.csv")
+
+        if not os.path.exists(path):
+            return f"Data file not found: {path}. Set TRIAL_BALANCE_PATH in .env"
+
+        df = pd.read_csv(path)
+
+        # EntityA receivable — what it thinks EntityB owes it
+        a_data = df[(df["entity"] == entity_a) & (df["period"] == period)]
+        a_receivable = float(a_data[a_data["account_code"].astype(str) == "1100"]["debit"].sum())
+
+        # EntityB payable — what it thinks it owes EntityA
+        b_data = df[(df["entity"] == entity_b) & (df["period"] == period)]
+        b_payable = float(b_data[b_data["account_code"].astype(str) == "2001"]["credit"].sum())
+
+        gap = a_receivable - b_payable
+        reconciled = abs(gap) < 0.01
+
+        result = {
+            "entity_a": entity_a,
+            "entity_b": entity_b,
+            "period": period,
+            "a_receivable": a_receivable,
+            "b_payable": b_payable,
+            "gap": gap,
+            "reconciled": reconciled,
+            "risk": "LOW" if reconciled else ("HIGH" if abs(gap) > 50000 else "MEDIUM"),
+            "action_required": "None" if reconciled else f"Post correcting entry of ${abs(gap):,.2f}",
+            "recommended_entry": "None" if reconciled else (
+                f"DR Accounts Payable ({entity_b}) ${abs(gap):,.2f} / "
+                f"CR Accounts Receivable ({entity_a}) ${abs(gap):,.2f}"
+                if gap > 0 else
+                f"DR Accounts Receivable ({entity_a}) ${abs(gap):,.2f} / "
+                f"CR Accounts Payable ({entity_b}) ${abs(gap):,.2f}"
+            )
+        }
+        return json.dumps(result, indent=2, default=str)
+
+    except Exception as e:
+        return f"Error running reconciliation: {str(e)}"
+
 # ===========================================================================
 # Entry point
 # ===========================================================================
