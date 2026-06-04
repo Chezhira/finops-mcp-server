@@ -25,7 +25,7 @@ Claude calls the MCP tools, the tools call the Finance AI Ecosystem FastAPI back
 
 ---
 
-## Tools — 19 across 3 tiers
+## Tools — 20 across 4 tiers
 
 ### Tier 1 — Core workflow
 
@@ -60,6 +60,13 @@ Claude calls the MCP tools, the tools call the Finance AI Ecosystem FastAPI back
 | `get_fx_rate` | Single currency pair rate (e.g. USD → TZS). |
 | `list_tenants` | List all configured tenants. |
 | `sync_postgres` | Trigger manual SQLite → Postgres sync after coming back online. |
+
+
+### Tier 4 — Direct Analysis (no backend required)
+
+| Tool | Description |
+|------|-------------|
+| `reconcile_intercompany` | Reconcile intercompany balances between two entities directly from a trial balance CSV. Identifies AR/AP mismatches, calculates the gap, and returns a recommended correcting journal entry. No backend server required. |
 
 ---
 
